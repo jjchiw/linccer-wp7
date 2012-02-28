@@ -8,11 +8,11 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
-using LinccerApi;
-using Linccerwp7.Tos;
+using LinccerApi.WindowsPhone;
 using System.Device.Location;
+using System.Linq;
 
-namespace Linccerwp7.Tasks
+namespace LinccerApp.WindowsPhone.Tasks
 {
 	public class LinccerTasks
 	{
@@ -57,7 +57,7 @@ namespace Linccerwp7.Tasks
 			this._linccer.Share("one-to-one", hoc, callback);
 		}
 
-		public void Receive()
+		public void Receive(LinccerContentCallback callback)
 		{
 
 			// inialize filecache for temporary up- and downloading large files (not used jet)
@@ -69,9 +69,9 @@ namespace Linccerwp7.Tasks
 			this._linccer.Receive<Hoc>("one-to-one", (hoc) =>
 			{
 				if (hoc == null)
-					System.Console.WriteLine("no sender found");
+					callback("no sender found");
 				else
-					System.Console.WriteLine(hoc);
+					callback(String.Join(",", hoc.DataList.Where(x => x.Type == "text/plain").Select(x => x.Content)));
 			});
 		}
 

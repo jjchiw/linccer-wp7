@@ -11,10 +11,10 @@ using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 using System.Device.Location;
-using Linccerwp7.Tasks;
 using System.Threading;
+using LinccerApp.WindowsPhone.Tasks;
 
-namespace Linccerwp7
+namespace LinccerApp.WindowsPhone
 {
 	public partial class MainPage : PhoneApplicationPage
 	{
@@ -51,7 +51,10 @@ namespace Linccerwp7
 
 		private void ReceiveButton_Click(object sender, EventArgs e)
 		{
-
+			linccerTasks.Receive((content) =>
+			{
+				Dispatcher.BeginInvoke(() => ResponseContentTextBlock.Text = content);
+			});
 		}
 
 		void watcher_StatusChanged(object sender, GeoPositionStatusChangedEventArgs e)

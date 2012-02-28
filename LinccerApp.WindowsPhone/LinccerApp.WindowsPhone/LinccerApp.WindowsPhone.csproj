@@ -9,8 +9,8 @@
     <ProjectTypeGuids>{C089C8C0-30E0-4E22-80C0-CE093F111A43};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Linccerwp7</RootNamespace>
-    <AssemblyName>Linccerwp7</AssemblyName>
+    <RootNamespace>LinccerApp.WindowsPhone</RootNamespace>
+    <AssemblyName>LinccerApp.WindowsPhone</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <SilverlightVersion>$(TargetFrameworkVersion)</SilverlightVersion>
     <TargetFrameworkProfile>WindowsPhone71</TargetFrameworkProfile>
@@ -20,7 +20,7 @@
     </SupportedCultures>
     <XapOutputs>true</XapOutputs>
     <GenerateSilverlightManifest>true</GenerateSilverlightManifest>
-    <XapFilename>linccerwp7.xap</XapFilename>
+    <XapFilename>LinccerApp.WindowsPhone.xap</XapFilename>
     <SilverlightManifestTemplate>Properties\AppManifest.xml</SilverlightManifestTemplate>
     <SilverlightAppEntry>Linccerwp7.App</SilverlightAppEntry>
     <ValidateXaml>true</ValidateXaml>
@@ -98,9 +98,9 @@
     <Content Include="SplashScreenImage.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\LinccerApi-wp7\LinccerApi-wp7.csproj">
+    <ProjectReference Include="..\..\..\linccer-dotnet\LinccerApi.WindowsPhone\LinccerApi.WindowsPhone.csproj">
       <Project>{00908B21-9843-4FF2-BF62-9011ED68747D}</Project>
-      <Name>LinccerApi-wp7</Name>
+      <Name>LinccerApi.WindowsPhone</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\Silverlight for Phone\$(TargetFrameworkVersion)\Microsoft.Silverlight.$(TargetFrameworkProfile).Overrides.targets" />

@@ -31,10 +31,10 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
-using LinccerApi;
+using LinccerApi.WindowsPhone;
 
 
-namespace Linccerwp7.Tos
+namespace LinccerApp.WindowsPhone
 {
     public class Hoc
     {

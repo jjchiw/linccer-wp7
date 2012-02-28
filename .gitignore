@@ -1,0 +1,12 @@
+*exe
+*mdb
+*pidb
+bin/
+*userprefs
+[Oo]bj/
+[Bb]in/
+*.suo
+*.user
+/TestResults
+*.vspscc
+*.vssscc
