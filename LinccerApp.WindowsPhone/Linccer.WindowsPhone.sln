@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linccerwp7", "linccerwp7\Linccerwp7.csproj", "{44EFFC09-62F8-4CD6-8B07-778A8A1B53A5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linccer.WindowsPhone", "LinccerApp.WindowsPhone\LinccerApp.WindowsPhone.csproj", "{44EFFC09-62F8-4CD6-8B07-778A8A1B53A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinccerApi-wp7", "..\LinccerApi-wp7\LinccerApi-wp7.csproj", "{00908B21-9843-4FF2-BF62-9011ED68747D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LinccerApi.WindowsPhone", "..\..\linccer-dotnet\LinccerApi.WindowsPhone\LinccerApi.WindowsPhone.csproj", "{00908B21-9843-4FF2-BF62-9011ED68747D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
