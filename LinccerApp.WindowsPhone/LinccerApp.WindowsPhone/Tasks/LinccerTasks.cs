@@ -11,6 +11,7 @@ using System.Windows.Shapes;
 using LinccerApi.WindowsPhone;
 using System.Device.Location;
 using System.Linq;
+using System.IO;
 
 namespace LinccerApp.WindowsPhone.Tasks
 {
@@ -18,10 +19,11 @@ namespace LinccerApp.WindowsPhone.Tasks
 	{
 		private ClientConfig _config;
 		private Linccer _linccer;
+		private const int TIMEOUT = 60;
 
 		public LinccerTasks()
 		{
-			this._config = new ClientConfig("C# Hoccer Demo");
+			this._config = new ClientConfig("Windows Phone Hoccer Demo");
 			this._config.UseProductionServers(); // enables communication to real Hoccer Clients (iOS & Android)
 
 			this._linccer = new Linccer();
@@ -36,16 +38,14 @@ namespace LinccerApp.WindowsPhone.Tasks
 			//41.38690, 2.16532
 			//41.386843, 2.165176
 			//this._linccer.Gps = new LocationInfo { Latitude = location.Latitude, Longitude = location.Longitude, Accuracy = 1000 };
+			//41.383164, 2.131466
+
 			this._linccer.Gps = new LocationInfo { Latitude = 41.386843, Longitude = 2.165176, Accuracy = 1000 };
 			this._linccer.SubmitEnvironment(callback);
 		}
 
 		public void Send(string content, LinccerContentCallback callback)
 		{
-			// inialize filecache for temporary up- and downloading large files (not used jet)
-			var cache = new FileCache();
-			cache.Config = this._config;
-
 			// create a plain message
 			Hoc hoc = new Hoc();
 			hoc.DataList.Add(
@@ -56,6 +56,30 @@ namespace LinccerApp.WindowsPhone.Tasks
 			// gesture to receive the message  (one-to-many is throw/catch)
 			this._linccer.Share("one-to-one", hoc, callback);
 		}
+
+		public void SendData(byte[] data, LinccerContentCallback callback)
+		{
+
+			// inialize filecache for temporary up- and downloading large files
+			var cache = new FileCache();
+			cache.Config = this._config;
+
+			cache.Store(data, TIMEOUT, (uri) =>
+			{
+				Hoc hoc = new Hoc();
+				hoc.DataList.Add(
+					new HocData { Uri = uri }
+				);
+
+				// share it 1:1, in the Hoccer mobile App, you need to perform a drag in
+				// gesture to receive the message  (one-to-many is throw/catch)
+				this._linccer.Share("one-to-one", hoc, callback);
+			});
+		}
+
+
+			
+
 
 		public void Receive(LinccerContentCallback callback)
 		{

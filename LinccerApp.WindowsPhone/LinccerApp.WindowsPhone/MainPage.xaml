@@ -29,16 +29,17 @@
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
 			<StackPanel>
-				<TextBox Height="170" Name="ContentTextBox"></TextBox>
-				<Button Name="SendButton" Click="SendButton_Click">
+				<Image Name="ImageSend" Visibility="Collapsed"/>
+				
+				<TextBox Height="170" Name="ContentTextBox" Visibility="Collapsed"/>
+				
+				<!--<Button Name="SendButton" Click="SendButton_Click">
 					<TextBlock Text="Send"/>
-				</Button>
-				<Button Name="ReceiveButton" Click="ReceiveButton_Click">
-					<TextBlock Text="Receive"/>
-				</Button>
+				</Button>-->
 				<Button Name="UpdateButton" Click="UpdateButton_Click">
 					<TextBlock Text="Update"/>
 				</Button>
+				
 				<TextBlock Height="Auto" Name="StatusTextBlock"></TextBlock>
 				<TextBlock Height="Auto" Name="ResponseContentTextBlock" TextWrapping="Wrap"></TextBlock>
 			</StackPanel>
@@ -49,13 +50,13 @@
     <!--Sample code showing usage of ApplicationBar-->
     <phone:PhoneApplicationPage.ApplicationBar>
         <shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
-            <shell:ApplicationBarIconButton IconUri="/Images/folder.png" Text="select content" Click="ApplicationBarIconButton_Click"/>
-			<shell:ApplicationBarIconButton IconUri="/Images/share.png" Text="send" Click="ApplicationBarIconButton_Click"/>
-			<shell:ApplicationBarIconButton IconUri="/Images/download.png" Text="get" Click="ApplicationBarIconButton_Click"/>
-            <!--shell:ApplicationBar.MenuItems>
-                <shell:ApplicationBarMenuItem Text="MenuItem 1"/>
-                <shell:ApplicationBarMenuItem Text="MenuItem 2"/>
-            </shell:ApplicationBar.MenuItems-->
+            <shell:ApplicationBarIconButton IconUri="/Images/camera.png" Text="photo" Click="PhotoIconButton_Click"/>
+			<shell:ApplicationBarIconButton IconUri="/Images/edit.png" Text="message" Click="MessageIconButton_Click"/>
+			<shell:ApplicationBarIconButton IconUri="/Images/share.png" Text="send" Click="ShareIconButton_Click"/>
+			<shell:ApplicationBarIconButton IconUri="/Images/download.png" Text="get" Click="DownloadIconButton_Click"/>
+            <shell:ApplicationBar.MenuItems>
+                <shell:ApplicationBarMenuItem Text="about"/>
+            </shell:ApplicationBar.MenuItems>
         </shell:ApplicationBar>
     </phone:PhoneApplicationPage.ApplicationBar>
 

@@ -49,9 +49,27 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Phone" />
+    <Reference Include="Microsoft.Phone.Controls.Toolkit, Version=7.0.0.0, Culture=neutral, PublicKeyToken=b772ad94eb9ca604, processorArchitecture=MSIL">
+      <HintPath>..\packages\SilverlightToolkitWP.4.2011.12.14\lib\sl4-windowsphone71\Microsoft.Phone.Controls.Toolkit.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Phone.Interop" />
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.4.0.8\lib\sl4-windowsphone71\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NorthernLights.Controls">
+      <HintPath>..\packages\NorthernLightsWP7Toolkit.1.1.1\lib\sl4-windowsphone71\NorthernLights.Controls.dll</HintPath>
+    </Reference>
+    <Reference Include="NorthernLights.Core">
+      <HintPath>..\packages\NorthernLightsWP7Toolkit.1.1.1\lib\sl4-windowsphone71\NorthernLights.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="NorthernLights.LittleWatson">
+      <HintPath>..\packages\NorthernLightsWP7Toolkit.1.1.1\lib\sl4-windowsphone71\NorthernLights.LittleWatson.dll</HintPath>
+    </Reference>
+    <Reference Include="NorthernLights.PersistentVariables">
+      <HintPath>..\packages\NorthernLightsWP7Toolkit.1.1.1\lib\sl4-windowsphone71\NorthernLights.PersistentVariables.dll</HintPath>
+    </Reference>
+    <Reference Include="NorthernLights.StateVariables">
+      <HintPath>..\packages\NorthernLightsWP7Toolkit.1.1.1\lib\sl4-windowsphone71\NorthernLights.StateVariables.dll</HintPath>
     </Reference>
     <Reference Include="System.Device" />
     <Reference Include="System.Windows" />
@@ -60,11 +78,19 @@
     <Reference Include="System.Net" />
     <Reference Include="System.Xml" />
     <Reference Include="mscorlib.extensions" />
+    <Reference Include="TombstoneHelper">
+      <HintPath>..\packages\WP7TombstoneHelper.2.5\lib\TombstoneHelper.dll</HintPath>
+    </Reference>
+    <Reference Include="YourLastAboutDialog">
+      <HintPath>..\packages\YLAD.1.4\lib\sl40-wp71\YourLastAboutDialog.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\ExtensionMethods.cs" />
+    <Compile Include="MetroGridHelper.cs" />
     <Compile Include="SelectContent.xaml.cs">
       <DependentUpon>SelectContent.xaml</DependentUpon>
     </Compile>
@@ -101,6 +127,13 @@
     <Content Include="Background.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Content\About\Data.xml" />
+    <Resource Include="Images\camera.png" />
+    <Resource Include="Images\edit.png" />
+    <Content Include="Toolkit.Content\ApplicationBar.Cancel.png" />
+    <Content Include="Toolkit.Content\ApplicationBar.Check.png" />
+    <Content Include="Toolkit.Content\ApplicationBar.Delete.png" />
+    <Content Include="Toolkit.Content\ApplicationBar.Select.png" />
     <Resource Include="Images\share.png" />
     <Resource Include="Images\download.png" />
     <Resource Include="Images\folder.png" />
@@ -122,4 +155,8 @@
   </Target>
   -->
   <ProjectExtensions />
+  <UsingTask TaskName="NotifyPropertyWeaverMsBuildTask.WeavingTask" AssemblyFile="$(SolutionDir)Tools\NotifyPropertyWeaverMsBuildTask.dll" />
+  <Target Name="AfterCompile">
+    <NotifyPropertyWeaverMsBuildTask.WeavingTask />
+  </Target>
 </Project>

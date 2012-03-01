@@ -12,6 +12,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 using Microsoft.Phone.Shell;
+using NorthernLights;
 
 namespace LinccerApp.WindowsPhone
 {
@@ -96,6 +97,8 @@ namespace LinccerApp.WindowsPhone
 		// Code to execute on Unhandled Exceptions
 		private void Application_UnhandledException(object sender, ApplicationUnhandledExceptionEventArgs e)
 		{
+			LittleWatson.SaveExceptionForReporting(e.ExceptionObject as Exception);
+
 			if (System.Diagnostics.Debugger.IsAttached)
 			{
 				// An unhandled exception has occurred; break into the debugger

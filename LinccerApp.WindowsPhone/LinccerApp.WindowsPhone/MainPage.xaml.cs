@@ -13,6 +13,13 @@ using Microsoft.Phone.Controls;
 using System.Device.Location;
 using System.Threading;
 using LinccerApp.WindowsPhone.Tasks;
+using NorthernLights;
+using Microsoft.Phone.Tasks;
+using TombstoneHelper;
+using System.IO;
+using System.Windows.Media.Imaging;
+using System.Windows.Resources;
+using LinccerApp.WindowsPhone.Helpers;
 
 namespace LinccerApp.WindowsPhone
 {
@@ -39,22 +46,46 @@ namespace LinccerApp.WindowsPhone
 			new Thread(startLocServInBackground).Start();
 			StatusTextBlock.Text = "Starting Location Service...";
 
+			LoadAdminDebugHooks();
+
 		}
 
-		private void SendButton_Click(object sender, EventArgs e)
+		private static void LoadAdminDebugHooks()
 		{
-			linccerTasks.Send(ContentTextBox.Text, (content) =>
-				{
-					Dispatcher.BeginInvoke(() => ResponseContentTextBlock.Text = content);
-				});
-		}
+			ExceptionContainer exception = LittleWatson.GetPreviousException();
 
-		private void ReceiveButton_Click(object sender, EventArgs e)
-		{
-			linccerTasks.Receive((content) =>
+			if (exception != null)
 			{
-				Dispatcher.BeginInvoke(() => ResponseContentTextBlock.Text = content);
-			});
+				Deployment.Current.Dispatcher.BeginInvoke(() =>
+				{
+					EmailComposeTask email = new EmailComposeTask();
+					email.To = "jjchiw@gmail.com";
+					email.Subject = "LinccerApp.WindowsPhone: auto-generated problem report";
+					email.Body = exception.Message + Environment.NewLine + exception.StackTrace;
+					email.Show();
+				});
+			}
+
+			// Show graphics profiling information while debugging.
+			if (System.Diagnostics.Debugger.IsAttached)
+			{
+				// Display the current frame rate counters.
+				Application.Current.Host.Settings.EnableFrameRateCounter = true;
+
+				// Display the metro grid helper.
+				MetroGridHelper.IsVisible = true;
+
+			}
+		}
+
+		protected override void OnNavigatingFrom(System.Windows.Navigation.NavigatingCancelEventArgs e)
+		{
+		   this.SaveState(e); 
+		}
+ 
+		protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
+		{
+		   this.RestoreState();
 		}
 
 		void watcher_StatusChanged(object sender, GeoPositionStatusChangedEventArgs e)
@@ -110,6 +141,61 @@ namespace LinccerApp.WindowsPhone
 		private void UpdateButton_Click(object sender, EventArgs e)
 		{
 			linccerTasks.UpdateLocation(watcher.Position.Location, (content) =>
+			{
+				Dispatcher.BeginInvoke(() => ResponseContentTextBlock.Text = content);
+			});
+		}
+
+		private void PhotoIconButton_Click(object sender, EventArgs e)
+		{
+			ContentTextBox.Visibility = Visibility.Collapsed;
+			var selectphoto = new PhotoChooserTask();
+			selectphoto.Completed += new EventHandler<PhotoResult>(selectphoto_Completed);
+			selectphoto.Show();
+		}
+
+		void selectphoto_Completed(object sender, PhotoResult e)
+		{
+			if (e.TaskResult == TaskResult.OK)
+			{
+				var imageUri = new Uri(e.OriginalFileName);
+				ImageSend.Source = new BitmapImage(imageUri);
+				ImageSend.Visibility = Visibility.Visible;
+			}
+		}
+
+		private void MessageIconButton_Click(object sender, EventArgs e)
+		{
+			ImageSend.Visibility = Visibility.Collapsed;
+			ContentTextBox.Visibility = Visibility.Visible;
+		}
+
+		private void ShareIconButton_Click(object sender, EventArgs e)
+		{
+			if (ImageSend.Visibility == Visibility.Visible)
+			{
+				var bmp = ImageSend.Source as BitmapImage;
+
+				var imageBytes = bmp.ConvertToBytes();
+
+				linccerTasks.SendData(imageBytes, (content) =>
+				{
+					Dispatcher.BeginInvoke(() => ResponseContentTextBlock.Text = content);
+				});
+			}
+			else if (ContentTextBox.Visibility == Visibility.Visible)
+			{
+				linccerTasks.Send(ContentTextBox.Text, (content) =>
+				{
+					Dispatcher.BeginInvoke(() => ResponseContentTextBlock.Text = content);
+				});
+			}
+			
+		}
+
+		private void DownloadIconButton_Click(object sender, EventArgs e)
+		{
+			linccerTasks.Receive((content) =>
 			{
 				Dispatcher.BeginInvoke(() => ResponseContentTextBlock.Text = content);
 			});
