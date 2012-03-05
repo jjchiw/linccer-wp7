@@ -308,5 +308,10 @@ namespace LinccerApp.WindowsPhone
 			MediaLibrary mediaLibrary = new MediaLibrary();
 			mediaLibrary.SavePicture("linccer.jpg", bmp.ConvertToBytes());
 		}
+
+		private void AboutMenuItem_Click(object sender, EventArgs e)
+		{
+			NavigationService.Navigate(new Uri("/YourLastAboutDialog;component/AboutPage.xaml", UriKind.Relative));
+		}
 	}
 }

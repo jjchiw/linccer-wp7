@@ -86,7 +86,7 @@
 			<shell:ApplicationBarIconButton IconUri="/Images/camera.png" Text="photo" Click="PhotoIconButton_Click"/>
 			<shell:ApplicationBarIconButton IconUri="/Images/edit.png" Text="message" Click="MessageIconButton_Click"/>
 			<shell:ApplicationBar.MenuItems>
-				<shell:ApplicationBarMenuItem Text="about"/>
+				<shell:ApplicationBarMenuItem Text="about" Click="AboutMenuItem_Click"/>
 			</shell:ApplicationBar.MenuItems>
 		</shell:ApplicationBar>
 	</phone:PhoneApplicationPage.ApplicationBar>
