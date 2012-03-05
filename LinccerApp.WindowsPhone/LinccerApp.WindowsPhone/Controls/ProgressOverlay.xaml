@@ -1,0 +1,22 @@
+﻿<UserControl x:Class="LinccerApp.WindowsPhone.Controls.ProgressOverlay"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    d:DesignHeight="480" d:DesignWidth="480">
+
+	<Grid x:Name="LayoutRoot" Background="Transparent" Width="480" Height="800">
+		<Rectangle x:Name="backgroundRect" Grid.Row="0" Fill="{StaticResource PhoneChromeBrush}" Opacity="0.75"/>
+		<StackPanel x:Name="stackPanel" Orientation="Vertical" VerticalAlignment="Center">
+			<toolkit:PerformanceProgressBar Name="pbTwitter"
+			IsIndeterminate="True" Foreground="{StaticResource PhoneAccentBrush}" />
+			<TextBlock Opacity="1" Height="30" HorizontalAlignment="Center" VerticalAlignment="Center"
+                  Name="textBlockStatus" Text="Loading..." />
+		</StackPanel>
+	</Grid>
+</UserControl>

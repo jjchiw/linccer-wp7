@@ -20,6 +20,10 @@ using System.IO;
 using System.Windows.Media.Imaging;
 using System.Windows.Resources;
 using LinccerApp.WindowsPhone.Helpers;
+using LinccerApi.WindowsPhone;
+using LinccerApp.WindowsPhone.Controls;
+using System.IO.IsolatedStorage;
+using Microsoft.Xna.Framework.Media;
 
 namespace LinccerApp.WindowsPhone
 {
@@ -28,6 +32,22 @@ namespace LinccerApp.WindowsPhone
 		GeoCoordinateWatcher watcher;
 		LinccerTasks linccerTasks;
 		bool trackingOn = false;
+		LinccerContentCallback _contentCallback;
+		LinccerContentCallback _contentDebugCallback;
+		FileCacheGetCallback _fileContentCallback;
+
+		private ProgressOverlay _progress;
+		private ProgressOverlay Progress
+		{
+			get
+			{
+				if (_progress == null)
+				{
+					_progress = new ProgressOverlay();
+				}
+				return _progress;
+			}
+		}
 
 		// Constructor
 		public MainPage()
@@ -41,16 +61,20 @@ namespace LinccerApp.WindowsPhone
 			// wire up event handlers
 			watcher.StatusChanged += new EventHandler<GeoPositionStatusChangedEventArgs>(watcher_StatusChanged);
 			watcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(watcher_PositionChanged);
-			
+
 			// start up LocServ in bg; watcher_StatusChanged will be called when complete.
 			new Thread(startLocServInBackground).Start();
 			StatusTextBlock.Text = "Starting Location Service...";
 
 			LoadAdminDebugHooks();
 
+			_contentCallback = new LinccerContentCallback(LinccerContentCallbackResponse);
+			_contentDebugCallback = new LinccerContentCallback(LinccerContentDebugCallbackResponse);
+			_fileContentCallback = new FileCacheGetCallback(FileCacheGetCallbackResponse);
+
 		}
 
-		private static void LoadAdminDebugHooks()
+		private void LoadAdminDebugHooks()
 		{
 			ExceptionContainer exception = LittleWatson.GetPreviousException();
 
@@ -61,7 +85,7 @@ namespace LinccerApp.WindowsPhone
 					EmailComposeTask email = new EmailComposeTask();
 					email.To = "jjchiw@gmail.com";
 					email.Subject = "LinccerApp.WindowsPhone: auto-generated problem report";
-					email.Body = exception.Message + Environment.NewLine + exception.StackTrace;
+					email.Body = exception.Message + System.Environment.NewLine + exception.StackTrace;
 					email.Show();
 				});
 			}
@@ -75,17 +99,21 @@ namespace LinccerApp.WindowsPhone
 				// Display the metro grid helper.
 				MetroGridHelper.IsVisible = true;
 
+				UpdateButton.Visibility = Visibility.Visible;
+				StatusTextBlock.Visibility = Visibility.Visible;
+				ResponseContentTextBlock.Visibility = Visibility.Visible;
+				
 			}
 		}
 
 		protected override void OnNavigatingFrom(System.Windows.Navigation.NavigatingCancelEventArgs e)
 		{
-		   this.SaveState(e); 
+			this.SaveState(e);
 		}
- 
+
 		protected override void OnNavigatedTo(System.Windows.Navigation.NavigationEventArgs e)
 		{
-		   this.RestoreState();
+			this.RestoreState();
 		}
 
 		void watcher_StatusChanged(object sender, GeoPositionStatusChangedEventArgs e)
@@ -130,7 +158,6 @@ namespace LinccerApp.WindowsPhone
 			{
 				UpdateButton_Click(null, null);
 			}
-				
 		}
 
 		void startLocServInBackground()
@@ -170,35 +197,116 @@ namespace LinccerApp.WindowsPhone
 			ContentTextBox.Visibility = Visibility.Visible;
 		}
 
-		private void ShareIconButton_Click(object sender, EventArgs e)
+		private void SendToMany_Click(object sender, EventArgs e)
 		{
+			ShowProgressLayoutSend();
+
 			if (ImageSend.Visibility == Visibility.Visible)
 			{
 				var bmp = ImageSend.Source as BitmapImage;
 
 				var imageBytes = bmp.ConvertToBytes();
 
-				linccerTasks.SendData(imageBytes, (content) =>
-				{
-					Dispatcher.BeginInvoke(() => ResponseContentTextBlock.Text = content);
-				});
+				linccerTasks.SendDataToMany(imageBytes, _contentDebugCallback);
 			}
 			else if (ContentTextBox.Visibility == Visibility.Visible)
 			{
-				linccerTasks.Send(ContentTextBox.Text, (content) =>
-				{
-					Dispatcher.BeginInvoke(() => ResponseContentTextBlock.Text = content);
-				});
+				linccerTasks.SendTextToMany(ContentTextBox.Text, _contentDebugCallback);
 			}
-			
 		}
 
-		private void DownloadIconButton_Click(object sender, EventArgs e)
+		private void SendToOne_Click(object sender, EventArgs e)
 		{
-			linccerTasks.Receive((content) =>
+			ShowProgressLayoutSend();
+			
+			if (ImageSend.Visibility == Visibility.Visible)
 			{
-				Dispatcher.BeginInvoke(() => ResponseContentTextBlock.Text = content);
+				var bmp = ImageSend.Source as BitmapImage;
+
+				var imageBytes = bmp.ConvertToBytes();
+
+				linccerTasks.SendDataToOne(imageBytes, _contentDebugCallback);
+			}
+			else if (ContentTextBox.Visibility == Visibility.Visible)
+			{
+				linccerTasks.SendTextToOne(ContentTextBox.Text, _contentDebugCallback);
+			}
+		}
+
+		private void ShowProgressLayoutSend()
+		{
+			Progress.SetTextBlockStatus("Sending...");
+			Progress.Show();
+		}
+
+		private void ShowProgressLayoutDownloading()
+		{
+			Progress.SetTextBlockStatus("Downloading...");
+			Progress.Show();
+		}
+
+		private void ReceiveToOne_Click(object sender, EventArgs e)
+		{
+			ShowProgressLayoutDownloading();
+			linccerTasks.ReceiveFromOne(_contentCallback, _fileContentCallback);
+		}
+
+		private void ReceiveToMany_Click(object sender, EventArgs e)
+		{
+			ShowProgressLayoutDownloading();
+			linccerTasks.ReceiveFromMany(_contentCallback, _fileContentCallback);
+		}
+
+		private void LinccerContentCallbackResponse(string content)
+		{
+			Dispatcher.BeginInvoke(() =>
+			{
+				if (content != null)
+					ContentTextBox.Text = content;
+				else
+					MessageBox.Show("No sender found :(");
+
+				Progress.Hide();
 			});
+		}
+
+		private void LinccerContentDebugCallbackResponse(string content)
+		{
+			Dispatcher.BeginInvoke(() => 
+				{
+					ResponseContentTextBlock.Text = content;
+					Progress.Hide();
+				});
+		}
+
+		private void FileCacheGetCallbackResponse(byte[] data)
+		{
+			Dispatcher.BeginInvoke(() =>
+			{
+				try
+				{
+					ImageSend.Visibility = Visibility.Visible;
+					ContentTextBox.Visibility = Visibility.Collapsed;
+					
+					BitmapImage bitmapImage = new BitmapImage();
+					MemoryStream ms = new MemoryStream(data);
+					bitmapImage.SetSource(ms);
+					ImageSend.Source = bitmapImage;
+
+					Progress.Hide();
+				}
+				catch (Exception e)
+				{
+					MessageBox.Show("Could not download the file");
+				}
+			});
+		}
+
+		private void SaveImage_Click(object sender, RoutedEventArgs e)
+		{
+			var bmp = ImageSend.Source as BitmapImage;
+			MediaLibrary mediaLibrary = new MediaLibrary();
+			mediaLibrary.SavePicture("linccer.jpg", bmp.ConvertToBytes());
 		}
 	}
 }

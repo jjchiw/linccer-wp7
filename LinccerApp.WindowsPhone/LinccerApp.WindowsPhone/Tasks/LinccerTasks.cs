@@ -44,7 +44,13 @@ namespace LinccerApp.WindowsPhone.Tasks
 			this._linccer.SubmitEnvironment(callback);
 		}
 
-		public void Send(string content, LinccerContentCallback callback)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="content"></param>
+		/// <param name="mode">one-to-many / one-to-one</param>
+		/// <param name="callback"></param>
+		private void SendText(string content, SendMode mode, LinccerContentCallback callback)
 		{
 			// create a plain message
 			Hoc hoc = new Hoc();
@@ -54,10 +60,17 @@ namespace LinccerApp.WindowsPhone.Tasks
 
 			// share it 1:1, in the Hoccer mobile App, you need to perform a drag in
 			// gesture to receive the message  (one-to-many is throw/catch)
-			this._linccer.Share("one-to-one", hoc, callback);
+			var stringMode = SendModeString.ConvertSendModeToString(mode);
+			this._linccer.Share(stringMode, hoc, callback);
 		}
 
-		public void SendData(byte[] data, LinccerContentCallback callback)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="data"></param>
+		/// <param name="mode">one-to-many / one-to-one</param>
+		/// <param name="callback"></param>
+		private void SendData(byte[] data, SendMode mode, LinccerContentCallback callback)
 		{
 
 			// inialize filecache for temporary up- and downloading large files
@@ -71,34 +84,95 @@ namespace LinccerApp.WindowsPhone.Tasks
 					new HocData { Uri = uri }
 				);
 
+				var stringMode = SendModeString.ConvertSendModeToString(mode);
 				// share it 1:1, in the Hoccer mobile App, you need to perform a drag in
 				// gesture to receive the message  (one-to-many is throw/catch)
-				this._linccer.Share("one-to-one", hoc, callback);
+				this._linccer.Share(stringMode, hoc, callback);
 			});
 		}
 
-
-			
-
-
-		public void Receive(LinccerContentCallback callback)
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="content"></param>
+		/// <param name="mode">one-to-many / one-to-one</param>
+		/// <param name="callback"></param>
+		public void SendTextToOne(string content, LinccerContentCallback callback)
 		{
+			SendText(content, SendMode.OneToOne, callback);
+		}
 
-			// inialize filecache for temporary up- and downloading large files (not used jet)
-			var cache = new FileCache();
-			cache.Config = this._config;
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="data"></param>
+		/// <param name="mode">one-to-many / one-to-one</param>
+		/// <param name="callback"></param>
+		public void SendDataToOne(byte[] data, LinccerContentCallback callback)
+		{
+			SendData(data, SendMode.OneToOne, callback);
+		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="content"></param>
+		/// <param name="mode">one-to-many / one-to-one</param>
+		/// <param name="callback"></param>
+		public void SendTextToMany(string content,  LinccerContentCallback callback)
+		{
+			SendText(content, SendMode.OneToMany, callback);
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="data"></param>
+		/// <param name="mode">one-to-many / one-to-one</param>
+		/// <param name="callback"></param>
+		public void SendDataToMany(byte[] data, LinccerContentCallback callback)
+		{
+			SendData(data, SendMode.OneToMany, callback);
+		}
+
+		private void Receive(SendMode mode, LinccerContentCallback contentCallback, FileCacheGetCallback fileCallback)
+		{
+			var stringMode = SendModeString.ConvertSendModeToString(mode);
 			// receive 1:1, in the Hoccer mobile App, you need to perform a drag out
-				// gesture to send something to this client (one-to-many is throw/catch)
-			this._linccer.Receive<Hoc>("one-to-one", (hoc) =>
+			// gesture to send something to this client (one-to-many is throw/catch)
+			this._linccer.Receive<Hoc>(stringMode, (hoc) =>
 			{
 				if (hoc == null)
-					callback("no sender found");
+				{
+					contentCallback(null);
+				}
 				else
-					callback(String.Join(",", hoc.DataList.Where(x => x.Type == "text/plain").Select(x => x.Content)));
+				{
+					if(hoc.DataList.Any(x => x.Type == "text/plain"))
+					{
+						contentCallback(String.Join(",", hoc.DataList.Where(x => x.Type == "text/plain").Select(x => x.Content)));
+						return;
+					}
+
+					var data = hoc.DataList.FirstOrDefault(x => x.Uri != string.Empty);
+
+					//// inialize filecache for temporary up- and downloading large files
+					var cache = new FileCache();
+					cache.Config = this._config;
+					cache.Fetch(data.Uri, fileCallback);
+				}
 			});
 		}
 
-		
+		public void ReceiveFromMany( LinccerContentCallback contentCallback, FileCacheGetCallback fileCallback)
+		{
+			Receive(SendMode.OneToMany, contentCallback, fileCallback);
+		}
+
+		public void ReceiveFromOne( LinccerContentCallback contentCallback, FileCacheGetCallback fileCallback)
+		{
+			Receive(SendMode.OneToOne, contentCallback, fileCallback);
+		}
+
 	}
 }
