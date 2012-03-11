@@ -11,8 +11,10 @@ using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using Microsoft.Phone.Controls;
 using System.Device.Location;
-using System.Threading;
 using LinccerApp.WindowsPhone.Tasks;
+using LinccerApi.WindowsPhone;
+using LinccerApp.WindowsPhone.Controls;
+using System.Threading;
 using NorthernLights;
 using Microsoft.Phone.Tasks;
 using TombstoneHelper;
@@ -24,6 +26,8 @@ using LinccerApi.WindowsPhone;
 using LinccerApp.WindowsPhone.Controls;
 using System.IO.IsolatedStorage;
 using Microsoft.Xna.Framework.Media;
+using LinccerApp.WindowsPhone.Tos;
+using Newtonsoft.Json;
 
 namespace LinccerApp.WindowsPhone
 {
@@ -35,6 +39,7 @@ namespace LinccerApp.WindowsPhone
 		LinccerContentCallback _contentCallback;
 		LinccerContentCallback _contentDebugCallback;
 		FileCacheGetCallback _fileContentCallback;
+		MessageCollection messageCollection;
 
 		private ProgressOverlay _progress;
 		private ProgressOverlay Progress
@@ -54,6 +59,8 @@ namespace LinccerApp.WindowsPhone
 		{
 			InitializeComponent();
 
+			messageCollection = new MessageCollection();
+
 			linccerTasks = new LinccerTasks();
 
 			watcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High); // using high accuracy;
@@ -71,6 +78,8 @@ namespace LinccerApp.WindowsPhone
 			_contentCallback = new LinccerContentCallback(LinccerContentCallbackResponse);
 			_contentDebugCallback = new LinccerContentCallback(LinccerContentDebugCallbackResponse);
 			_fileContentCallback = new FileCacheGetCallback(FileCacheGetCallbackResponse);
+
+			this.DataContext = messageCollection;
 
 		}
 
@@ -99,7 +108,6 @@ namespace LinccerApp.WindowsPhone
 				// Display the metro grid helper.
 				MetroGridHelper.IsVisible = true;
 
-				UpdateButton.Visibility = Visibility.Visible;
 				StatusTextBlock.Visibility = Visibility.Visible;
 				ResponseContentTextBlock.Visibility = Visibility.Visible;
 				
@@ -118,6 +126,7 @@ namespace LinccerApp.WindowsPhone
 
 		void watcher_StatusChanged(object sender, GeoPositionStatusChangedEventArgs e)
 		{
+			
 			switch (e.Status)
 			{
 				case GeoPositionStatus.Disabled:
@@ -167,9 +176,16 @@ namespace LinccerApp.WindowsPhone
 
 		private void UpdateButton_Click(object sender, EventArgs e)
 		{
+			Microsoft.Phone.Shell.SystemTray.ProgressIndicator.IsVisible = true;
+
 			linccerTasks.UpdateLocation(watcher.Position.Location, (content) =>
 			{
-				Dispatcher.BeginInvoke(() => ResponseContentTextBlock.Text = content);
+				var response = JsonConvert.DeserializeObject<UpdateLocationResponse>(content);
+				Dispatcher.BeginInvoke(() =>
+					{
+						PivotTable.Title = String.Format("Linccer: {0}", response.Devices.ToString());
+						Microsoft.Phone.Shell.SystemTray.ProgressIndicator.IsVisible = false;
+					});
 			});
 		}
 
@@ -188,13 +204,18 @@ namespace LinccerApp.WindowsPhone
 				var imageUri = new Uri(e.OriginalFileName);
 				ImageSend.Source = new BitmapImage(imageUri);
 				ImageSend.Visibility = Visibility.Visible;
+
+				this.PivotTable.SelectedIndex = 0;
 			}
 		}
+
+
 
 		private void MessageIconButton_Click(object sender, EventArgs e)
 		{
 			ImageSend.Visibility = Visibility.Collapsed;
 			ContentTextBox.Visibility = Visibility.Visible;
+			this.PivotTable.SelectedIndex = 1;
 		}
 
 		private void SendToMany_Click(object sender, EventArgs e)
@@ -211,6 +232,15 @@ namespace LinccerApp.WindowsPhone
 			}
 			else if (ContentTextBox.Visibility == Visibility.Visible)
 			{
+				var message = new Message
+				{
+					Side = MessageSide.Me,
+					Text = ContentTextBox.Text,
+					Timestamp = DateTime.Now
+				};
+
+				messageCollection.Add(message);
+
 				linccerTasks.SendTextToMany(ContentTextBox.Text, _contentDebugCallback);
 			}
 		}
@@ -229,6 +259,15 @@ namespace LinccerApp.WindowsPhone
 			}
 			else if (ContentTextBox.Visibility == Visibility.Visible)
 			{
+				var message = new Message
+				{
+					Side = MessageSide.Me,
+					Text = ContentTextBox.Text,
+					Timestamp = DateTime.Now
+				};
+
+				messageCollection.Add(message);
+				
 				linccerTasks.SendTextToOne(ContentTextBox.Text, _contentDebugCallback);
 			}
 		}
@@ -262,7 +301,16 @@ namespace LinccerApp.WindowsPhone
 			Dispatcher.BeginInvoke(() =>
 			{
 				if (content != null)
-					ContentTextBox.Text = content;
+				{
+					var message = new Message
+					{
+						Side = MessageSide.World,
+						Text = content,
+						Timestamp = DateTime.Now
+					};
+
+					messageCollection.Add(message);
+				}
 				else
 					MessageBox.Show("No sender found :(");
 
@@ -274,7 +322,9 @@ namespace LinccerApp.WindowsPhone
 		{
 			Dispatcher.BeginInvoke(() => 
 				{
-					ResponseContentTextBlock.Text = content;
+					ScrollViewer1.UpdateLayout();
+					ScrollViewer1.ScrollToVerticalOffset(double.MaxValue);
+					ContentTextBox.Text = "";
 					Progress.Hide();
 				});
 		}
@@ -312,6 +362,19 @@ namespace LinccerApp.WindowsPhone
 		private void AboutMenuItem_Click(object sender, EventArgs e)
 		{
 			NavigationService.Navigate(new Uri("/YourLastAboutDialog;component/AboutPage.xaml", UriKind.Relative));
+		}
+
+		private void PivotTable_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			if (this.PivotTable.SelectedIndex == 0)
+			{
+				ImageSend.Visibility = Visibility.Visible;
+				ContentTextBox.Visibility = Visibility.Collapsed;
+				return;
+			}
+
+			ImageSend.Visibility = Visibility.Collapsed;
+			ContentTextBox.Visibility = Visibility.Visible;
 		}
 	}
 }

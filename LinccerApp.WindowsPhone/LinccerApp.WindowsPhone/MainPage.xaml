@@ -5,39 +5,40 @@
     xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
     xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
     mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="696"
     FontFamily="{StaticResource PhoneFontFamilyNormal}"
     FontSize="{StaticResource PhoneFontSizeNormal}"
     Foreground="{StaticResource PhoneForegroundBrush}"
-    SupportedOrientations="Portrait" Orientation="Portrait"
+    SupportedOrientations="Portrait"  Orientation="Portrait"
     shell:SystemTray.IsVisible="True"
-	xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls" xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+	xmlns:controls="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls" 
+	xmlns:toolkit="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone.Controls.Toolkit"
+	xmlns:contribControls="clr-namespace:WP7Contrib.View.Controls;assembly=WP7Contrib.View.Controls"
+    xmlns:contribConverters="clr-namespace:WP7Contrib.View.Controls.Converters;assembly=WP7Contrib.View.Controls"
+	xmlns:local="clr-namespace:LinccerApp.WindowsPhone"
 	>
 
+	<shell:SystemTray.ProgressIndicator>
+		<shell:ProgressIndicator IsIndeterminate="True" Text="Updating location" IsVisible="False"/>
+	</shell:SystemTray.ProgressIndicator>
+	
+	
 	<!--LayoutRoot is the root grid where all page content is placed-->
 	<Grid x:Name="LayoutRoot" Background="Transparent">
-		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto"/>
-			<RowDefinition Height="*"/>
-		</Grid.RowDefinitions>
-
-		<!--TitlePanel contains the name of the application and page title-->
-		<StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
-			<TextBlock x:Name="ApplicationTitle" Text="LINCCER" Style="{StaticResource PhoneTextNormalStyle}"/>
-			<TextBlock x:Name="PageTitle" Text="dashboard" Margin="9,-7,0,0" Style="{StaticResource PhoneTextTitle1Style}"/>
-		</StackPanel>
-
-		<!--ContentPanel - place additional content here-->
-		<Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,8,0">
-			<ScrollViewer>
-				<StackPanel>
-					<StackPanel Width="500">
-						<StackPanel Orientation="Vertical">
-							<StackPanel Orientation="Horizontal">
-								<Button>
-									<Button.Content>
-										<TextBlock Text="push to send" Width="175" TextAlignment="Center">
+		<!--Pivot Control-->
+		<controls:Pivot Title="Linccer" Name="PivotTable" SelectionChanged="PivotTable_SelectionChanged">
+			<!--Pivot item one-->
+			<controls:PivotItem Header="images">
+				<Grid>
+					<ScrollViewer>
+						<StackPanel>
+							<StackPanel Width="500">
+								<StackPanel Orientation="Vertical">
+									<StackPanel Orientation="Horizontal">
+										<Button>
+											<Button.Content>
+												<TextBlock Text="push to send" Width="175" TextAlignment="Center">
 											<toolkit:ContextMenuService.ContextMenu>
 												<toolkit:ContextMenu>
 													<toolkit:MenuItem Header="send to one" Click="SendToOne_Click"/>
@@ -45,39 +46,86 @@
 												</toolkit:ContextMenu>
 											</toolkit:ContextMenuService.ContextMenu>
 												</TextBlock>
-									</Button.Content>
-								</Button>
-								<Button>
-									<Button.Content>
-										<TextBlock Text="push to receive" Width="175" TextAlignment="Center">
+											</Button.Content>
+										</Button>
+										<Button>
+											<Button.Content>
+												<TextBlock Text="push to receive" Width="175" TextAlignment="Center">
 											<toolkit:ContextMenuService.ContextMenu>
 												<toolkit:ContextMenu>
 													<toolkit:MenuItem Header="receive from one" Click="ReceiveToOne_Click"/>
 													<toolkit:MenuItem Header="receive from many" Click="ReceiveToMany_Click"/>
 												</toolkit:ContextMenu>
 											</toolkit:ContextMenuService.ContextMenu>
-										</TextBlock>
-									</Button.Content>
-								</Button>
+												</TextBlock>
+											</Button.Content>
+										</Button>
+									</StackPanel>
+									<Image Name="ImageSend" Visibility="Collapsed">
+										<toolkit:ContextMenuService.ContextMenu>
+											<toolkit:ContextMenu>
+												<toolkit:MenuItem Header="save" Click="SaveImage_Click"/>
+											</toolkit:ContextMenu>
+										</toolkit:ContextMenuService.ContextMenu>
+									</Image>
+								</StackPanel>
 							</StackPanel>
-							<Image Name="ImageSend" Visibility="Collapsed">
-								<toolkit:ContextMenuService.ContextMenu>
-									<toolkit:ContextMenu>
-										<toolkit:MenuItem Header="save" Click="SaveImage_Click"/>
-									</toolkit:ContextMenu>
-								</toolkit:ContextMenuService.ContextMenu>
-							</Image>
-							<TextBox Height="176" Name="ContentTextBox" Visibility="Visible" Width="503" Padding="0" />
+							<!--<Button Name="UpdateButton" Click="UpdateButton_Click" Visibility="Collapsed">
+								<TextBlock Text="Update"/>
+							</Button>
+							<TextBlock Height="Auto" Name="StatusTextBlock" Visibility="Collapsed"></TextBlock>
+							<TextBlock Height="Auto" Name="ResponseContentTextBlock" TextWrapping="Wrap" Visibility="Collapsed"></TextBlock>-->
 						</StackPanel>
-					</StackPanel>
-					<Button Name="UpdateButton" Click="UpdateButton_Click" Visibility="Collapsed">
-						<TextBlock Text="Update"/>
-					</Button>
-					<TextBlock Height="Auto" Name="StatusTextBlock" Visibility="Collapsed"></TextBlock>
-					<TextBlock Height="Auto" Name="ResponseContentTextBlock" TextWrapping="Wrap" Visibility="Collapsed"></TextBlock>
-				</StackPanel>
-			</ScrollViewer>
-		</Grid>
+					</ScrollViewer>
+				</Grid>
+			</controls:PivotItem>
+
+			<!--Pivot item two-->
+			<controls:PivotItem Header="chat">
+				<Grid>
+						<StackPanel>
+							<StackPanel Width="500">
+								<StackPanel Orientation="Vertical">
+									<StackPanel Orientation="Horizontal">
+										<Button>
+											<Button.Content>
+												<TextBlock Text="push to send" Width="175" TextAlignment="Center">
+											<toolkit:ContextMenuService.ContextMenu>
+												<toolkit:ContextMenu>
+													<toolkit:MenuItem Header="send to one" Click="SendToOne_Click"/>
+													<toolkit:MenuItem Header="send to many" Click="SendToMany_Click"/>
+												</toolkit:ContextMenu>
+											</toolkit:ContextMenuService.ContextMenu>
+												</TextBlock>
+											</Button.Content>
+										</Button>
+										<Button>
+											<Button.Content>
+												<TextBlock Text="push to receive" Width="175" TextAlignment="Center">
+											<toolkit:ContextMenuService.ContextMenu>
+												<toolkit:ContextMenu>
+													<toolkit:MenuItem Header="receive from one" Click="ReceiveToOne_Click"/>
+													<toolkit:MenuItem Header="receive from many" Click="ReceiveToMany_Click"/>
+												</toolkit:ContextMenu>
+											</toolkit:ContextMenuService.ContextMenu>
+												</TextBlock>
+											</Button.Content>
+										</Button>
+									</StackPanel>
+									<StackPanel Height="400">
+									<ScrollViewer  Name="ScrollViewer1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" Height="400">
+										<local:ConversationView/>
+										</ScrollViewer>
+									</StackPanel>
+								<TextBox  Name="ContentTextBox" Visibility="Visible" Width="503" Padding="0" />
+								</StackPanel>
+							</StackPanel>
+							<TextBlock Height="Auto" Name="StatusTextBlock" Visibility="Collapsed"></TextBlock>
+							<TextBlock Height="Auto" Name="ResponseContentTextBlock" TextWrapping="Wrap" Visibility="Collapsed"></TextBlock>
+						</StackPanel>
+				</Grid>
+			</controls:PivotItem>
+		</controls:Pivot>
 	</Grid>
 
 	<!--Sample code showing usage of ApplicationBar-->
@@ -85,8 +133,9 @@
 		<shell:ApplicationBar IsVisible="True" IsMenuEnabled="True">
 			<shell:ApplicationBarIconButton IconUri="/Images/camera.png" Text="photo" Click="PhotoIconButton_Click"/>
 			<shell:ApplicationBarIconButton IconUri="/Images/edit.png" Text="message" Click="MessageIconButton_Click"/>
+			<shell:ApplicationBarIconButton IconUri="/Images/refresh.png" Text="message" Click="UpdateButton_Click"/>
 			<shell:ApplicationBar.MenuItems>
-				<shell:ApplicationBarMenuItem Text="about" Click="AboutMenuItem_Click"/>
+				<shell:ApplicationBarMenuItem Text="about"/>
 			</shell:ApplicationBar.MenuItems>
 		</shell:ApplicationBar>
 	</phone:PhoneApplicationPage.ApplicationBar>
